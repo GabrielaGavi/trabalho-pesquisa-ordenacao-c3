@@ -1,12 +1,18 @@
 package trabalho;
 
-import java.io.*;
+import trabalho.entidades.Reserva;
+import trabalho.io.Leitor;
+import trabalho.io.Gravador;
+import trabalho.pesquisa.*;
+import trabalho.ordenacao.*;
+
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Main {
 
     public static void main(String[] args) {
-        String[] arquivosEntrada = {
+        String[] arquivosReservas = {
                 "src/arquivos/reserva1000alea.txt",
                 "src/arquivos/reserva5000alea.txt",
                 "src/arquivos/reserva10000alea.txt",
@@ -22,9 +28,10 @@ public class Main {
         };
 
         System.out.println("===== RESULTADOS DOS TESTES =====\n");
-        System.out.println("===ORDENAÇÃO===");
-        for (String arquivo : arquivosEntrada) {
-            String nomeCurto = new File(arquivo).getName();
+        System.out.println("=== ORDENAÇÃO ===");
+
+        for (String arquivo : arquivosReservas) {
+            String nomeCurto = arquivo.substring(arquivo.lastIndexOf("/") + 1);
             System.out.println("Arquivo: " + nomeCurto);
             System.out.println("--------------------------------------");
             testarHeapsort(arquivo, nomeCurto);
@@ -33,25 +40,31 @@ public class Main {
             System.out.println();
         }
 
-        System.out.println("===== PESQUISA =====\n");
-        for (String arquivo : arquivosEntrada) {
-            String nomeCurto = new File(arquivo).getName();
-            try {
-                PesquisaABB.testarABB(arquivo, nomeCurto, "src/arquivos/nome.txt");
-            } catch (StackOverflowError e) {
-                System.out.println("StackOverflow esperado na ABB, árvore muito desbalanceada (virou lista encadeada gigante)");
+        System.out.println("===== PESQUISA =====");
+
+        String arquivoNomes = "src/arquivos/nome.txt";
+        try {
+            ArrayList<Reserva> nomes = Leitor.ler(arquivoNomes);
+
+            for (String arquivo : arquivosReservas) {
+                String nomeCurto = arquivo.substring(arquivo.lastIndexOf("/") + 1);
+                System.out.println("\nArquivo: " + nomeCurto);
+                testarABB(arquivo, nomeCurto, nomes);
             }
-            System.out.println();
+
+        } catch (IOException e) {
+            System.err.println("Erro ao ler arquivo de nomes: " + e.getMessage());
         }
     }
 
-
+    /*
+     * MÉTODOS DE ORDENAÇÃO
+     */
 
     static void testarHeapsort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
-
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -59,15 +72,11 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
-
             long media = soma / 5;
             System.out.printf("Heapsort: %,d ns%n", media);
-
-            String saida = "saida/heap_" + nomeArquivo;
-            Gravador.gravar(saida, reservas);
-
+            Gravador.gravar("saida/heap_" + nomeArquivo, reservas);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Erro no Heapsort (" + nomeArquivo + "): " + e.getMessage());
         }
     }
 
@@ -75,7 +84,6 @@ public class Main {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
-
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -83,15 +91,11 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
-
             long media = soma / 5;
             System.out.printf("Quicksort: %,d ns%n", media);
-
-            String saida = "saida/quick_" + nomeArquivo;
-            Gravador.gravar(saida, reservas);
-
+            Gravador.gravar("saida/quick_" + nomeArquivo, reservas);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Erro no Quicksort (" + nomeArquivo + "): " + e.getMessage());
         }
     }
 
@@ -99,7 +103,6 @@ public class Main {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
-
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -107,275 +110,53 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
-
             long media = soma / 5;
             System.out.printf("Quick+Ins: %,d ns%n", media);
-
-            String saida = "saida/quickins_" + nomeArquivo;
-            Gravador.gravar(saida, reservas);
-
+            Gravador.gravar("saida/quickins_" + nomeArquivo, reservas);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-}
-
-/* --- ORDENAÇÃO --- */
-
-class Heapsort {
-    public static void ordenar(ArrayList<Reserva> arr) {
-        int n = arr.size();
-        for (int i = n / 2 - 1; i >= 0; i--) heapify(arr, n, i);
-        for (int i = n - 1; i > 0; i--) {
-            trocar(arr, 0, i);
-            heapify(arr, i, 0);
+            System.err.println("Erro no Quick+Ins (" + nomeArquivo + "): " + e.getMessage());
         }
     }
 
-    private static void heapify(ArrayList<Reserva> arr, int n, int i) {
-        int maior = i, esq = 2 * i + 1, dir = 2 * i + 2;
-        if (esq < n && comp(arr.get(esq), arr.get(maior)) > 0) maior = esq;
-        if (dir < n && comp(arr.get(dir), arr.get(maior)) > 0) maior = dir;
-        if (maior != i) {
-            trocar(arr, i, maior);
-            heapify(arr, n, maior);
-        }
-    }
+    /*
+     * MÉTODOS DE PESQUISA
+     */
 
-    private static void trocar(ArrayList<Reserva> arr, int i, int j) {
-        Reserva temp = arr.get(i);
-        arr.set(i, arr.get(j));
-        arr.set(j, temp);
-    }
-
-    private static int comp(Reserva a, Reserva b) {
-        int c = a.getNome().compareToIgnoreCase(b.getNome());
-        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
-    }
-}
-
-class Quicksort {
-    public static void ordenar(ArrayList<Reserva> arr, int ini, int fim) {
-        if (ini < fim) {
-            int p = dividir(arr, ini, fim);
-            ordenar(arr, ini, p - 1);
-            ordenar(arr, p + 1, fim);
-        }
-    }
-
-    private static int dividir(ArrayList<Reserva> arr, int ini, int fim) {
-        int meio = (ini + fim) / 2;
-        Reserva a = arr.get(ini), b = arr.get(meio), c = arr.get(fim), pivo;
-        if (comp(a, b) < 0) {
-            if (comp(b, c) < 0) pivo = b;
-            else if (comp(a, c) < 0) pivo = c;
-            else pivo = a;
-        } else {
-            if (comp(a, c) < 0) pivo = a;
-            else if (comp(b, c) < 0) pivo = c;
-            else pivo = b;
-        }
-        int idx = (pivo == a ? ini : (pivo == b ? meio : fim));
-        trocar(arr, idx, fim);
-        pivo = arr.get(fim);
-        int i = ini - 1;
-        for (int j = ini; j < fim; j++) {
-            if (comp(arr.get(j), pivo) <= 0) {
-                i++;
-                trocar(arr, i, j);
-            }
-        }
-        trocar(arr, i + 1, fim);
-        return i + 1;
-    }
-
-    private static void trocar(ArrayList<Reserva> arr, int i, int j) {
-        Reserva temp = arr.get(i);
-        arr.set(i, arr.get(j));
-        arr.set(j, temp);
-    }
-
-    private static int comp(Reserva a, Reserva b) {
-        int c = a.getNome().compareToIgnoreCase(b.getNome());
-        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
-    }
-}
-
-class QuickIns {
-    private static final int LIMITE = 20;
-
-    public static void ordenar(ArrayList<Reserva> arr, int ini, int fim) {
-        if (fim - ini <= LIMITE) inserir(arr, ini, fim);
-        else if (ini < fim) {
-            int p = dividir(arr, ini, fim);
-            ordenar(arr, ini, p - 1);
-            ordenar(arr, p + 1, fim);
-        }
-    }
-
-    private static void inserir(ArrayList<Reserva> arr, int ini, int fim) {
-        for (int i = ini + 1; i <= fim; i++) {
-            Reserva chave = arr.get(i);
-            int j = i - 1;
-            while (j >= ini && comp(arr.get(j), chave) > 0) {
-                arr.set(j + 1, arr.get(j));
-                j--;
-            }
-            arr.set(j + 1, chave);
-        }
-    }
-
-    private static int dividir(ArrayList<Reserva> arr, int ini, int fim) {
-        int meio = (ini + fim) / 2;
-        Reserva a = arr.get(ini), b = arr.get(meio), c = arr.get(fim), pivo;
-        if (comp(a, b) < 0) {
-            if (comp(b, c) < 0) pivo = b;
-            else if (comp(a, c) < 0) pivo = c;
-            else pivo = a;
-        } else {
-            if (comp(a, c) < 0) pivo = a;
-            else if (comp(b, c) < 0) pivo = c;
-            else pivo = b;
-        }
-        int idx = (pivo == a ? ini : (pivo == b ? meio : fim));
-        trocar(arr, idx, fim);
-        pivo = arr.get(fim);
-        int i = ini - 1;
-        for (int j = ini; j < fim; j++) {
-            if (comp(arr.get(j), pivo) <= 0) {
-                i++;
-                trocar(arr, i, j);
-            }
-        }
-        trocar(arr, i + 1, fim);
-        return i + 1;
-    }
-
-    private static void trocar(ArrayList<Reserva> arr, int i, int j) {
-        Reserva temp = arr.get(i);
-        arr.set(i, arr.get(j));
-        arr.set(j, temp);
-    }
-
-    private static int comp(Reserva a, Reserva b) {
-        int c = a.getNome().compareToIgnoreCase(b.getNome());
-        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
-    }
-}
-
-/* --- PESQUISA ABB --- */
-
-class NoABB {
-    Reserva dado;
-    NoABB esq, dir;
-
-    NoABB(Reserva dado) {
-        this.dado = dado;
-    }
-}
-
-class ABB {
-    private NoABB raiz;
-
-    public void inserir(Reserva r) {
-        raiz = inserirRec(raiz, r);
-    }
-
-    private NoABB inserirRec(NoABB atual, Reserva r) {
-        if (atual == null) return new NoABB(r);
-
-        int cmp = r.getNome().compareToIgnoreCase(atual.dado.getNome());
-        if (cmp < 0)
-            atual.esq = inserirRec(atual.esq, r);
-        else if (cmp > 0)
-            atual.dir = inserirRec(atual.dir, r);
-        else {
-            int cmpCod = r.getCodigo().compareToIgnoreCase(atual.dado.getCodigo());
-            if (cmpCod < 0)
-                atual.esq = inserirRec(atual.esq, r);
-            else if (cmpCod > 0)
-                atual.dir = inserirRec(atual.dir, r);
-            else
-                return atual; // já existe, evita recursao infinita (nome e cod iguais)
-        }
-
-        return atual;
-    }
-
-    public ArrayList<Reserva> buscar(String nome) {
-        ArrayList<Reserva> resultados = new ArrayList<>();
-        buscarRec(raiz, nome, resultados);
-        return resultados;
-    }
-
-    private void buscarRec(NoABB atual, String nome, ArrayList<Reserva> resultados) {
-        if (atual == null) return;
-
-        int cmp = nome.compareToIgnoreCase(atual.dado.getNome());
-        if (cmp == 0)
-            resultados.add(atual.dado);
-
-        if (cmp <= 0)
-            buscarRec(atual.esq, nome, resultados);
-        if (cmp >= 0)
-            buscarRec(atual.dir, nome, resultados);
-    }
-}
-
-class PesquisaABB {
-    public static void testarABB(String caminhoReservas, String nomeArquivo, String caminhoNomes) {
+    static void testarABB(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
         try {
-            long soma = 0;
-            for (int k = 0; k < 5; k++) {
-                long inicio = System.nanoTime();
+            ABB arvore = new ABB();
+            ArrayList<Reserva> reservas = Leitor.ler(caminho);
 
-                ArrayList<Reserva> reservas = Leitor.ler(caminhoReservas);
-                ABB abb = new ABB();
-                for (Reserva r : reservas)
-                    abb.inserir(r);
-
-                ArrayList<String> nomesPesquisa = new ArrayList<>();
-                try (BufferedReader br = new BufferedReader(new FileReader(caminhoNomes))) {
-                    String linha;
-                    while ((linha = br.readLine()) != null)
-                        nomesPesquisa.add(linha.trim());
-                }
-
-                String saida = "saida/ABB_" + new File(nomeArquivo).getName();
-                try (BufferedWriter bw = new BufferedWriter(new FileWriter(saida))) {
-                    for (String nome : nomesPesquisa) {
-                        ArrayList<Reserva> achadas = abb.buscar(nome);
-                        bw.write("NOME " + nome + ":");
-                        bw.newLine();
-
-                        if (achadas.isEmpty()) {
-                            bw.write("NÃO TEM RESERVA");
-                            bw.newLine();
-                        } else {
-                            for (Reserva r : achadas) {
-                                bw.write("Reserva: " + r.getCodigo() +
-                                        " Voo: " + r.getVoo() +
-                                        " Data: " + r.getData() +
-                                        " Assento: " + r.getAssento());
-                                bw.newLine();
-                            }
-                            bw.write("TOTAL: " + achadas.size() + " reservas");
-                            bw.newLine();
-                        }
-                        bw.newLine();
-                    }
-                }
-
-                long fim = System.nanoTime();
-                soma += (fim - inicio);
+            for (Reserva r : reservas) {
+                arvore.inserir(r);
             }
 
-            long media = soma / 5;
-            System.out.println("Arquivo: " + nomeArquivo);
-            System.out.printf("ABB: %,d ns%n", media);
+            long inicio = System.nanoTime();
 
+            for (Reserva nomeReserva : nomes) {
+                ArrayList<Reserva> achadas = arvore.pesquisar(nomeReserva.getNome());
+                String saida = "saida/ABB_" + nomeArquivo;
+                arvore.gravarResultado(saida, nomeReserva.getNome(), achadas);
+            }
+
+            long fim = System.nanoTime();
+            System.out.println("ABB: " + (fim - inicio) + " ns");
+
+        } catch (StackOverflowError e) {
+            System.err.println("StackOverflow em " + nomeArquivo + " > árvore desbalanceada (lista encadeada gigante).");
+
+            try {
+                ArrayList<Reserva> erro = new ArrayList<>();
+                erro.add(new Reserva("ERRO", "StackOverflow ao processar este arquivo.", "", "", ""));
+                Gravador.gravar("saida/ABB_" + nomeArquivo, erro);
+            } catch (IOException ex) {
+                System.err.println("Erro ao gravar arquivo de erro: " + ex.getMessage());
+            }
+
+        } catch (IOException e) {
+            System.err.println("Erro de E/S no arquivo " + nomeArquivo + ": " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Erro inesperado na ABB (" + nomeArquivo + "): " + e.getMessage());
         }
     }
 }

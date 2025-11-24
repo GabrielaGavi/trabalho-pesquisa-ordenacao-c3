@@ -1,4 +1,4 @@
-package trabalho;
+package trabalho.entidades;
 
 public class Reserva {
     private String codigo;

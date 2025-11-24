@@ -1,5 +1,7 @@
 
-package trabalho;
+package trabalho.io;
+
+import trabalho.entidades.Reserva;
 
 import java.io.*;
 import java.util.ArrayList;
