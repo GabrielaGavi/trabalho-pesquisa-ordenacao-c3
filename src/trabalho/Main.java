@@ -22,7 +22,7 @@ public class Main {
         };
 
         System.out.println("===== RESULTADOS DOS TESTES =====\n");
-
+        System.out.println("===ORDENAÇÃO===");
         for (String arquivo : arquivosEntrada) {
             String nomeCurto = new File(arquivo).getName();
             System.out.println("Arquivo: " + nomeCurto);
@@ -31,11 +31,21 @@ public class Main {
             testarQuicksort(arquivo, nomeCurto);
             testarQuickIns(arquivo, nomeCurto);
             System.out.println();
+        }
 
-
-
+        System.out.println("===== PESQUISA =====\n");
+        for (String arquivo : arquivosEntrada) {
+            String nomeCurto = new File(arquivo).getName();
+            try {
+                PesquisaABB.testarABB(arquivo, nomeCurto, "src/arquivos/nome.txt");
+            } catch (StackOverflowError e) {
+                System.out.println("StackOverflow esperado na ABB, árvore muito desbalanceada (virou lista encadeada gigante)");
+            }
+            System.out.println();
         }
     }
+
+
 
     static void testarHeapsort(String caminho, String nomeArquivo) {
         try {
@@ -109,6 +119,8 @@ public class Main {
         }
     }
 }
+
+/* --- ORDENAÇÃO --- */
 
 class Heapsort {
     public static void ordenar(ArrayList<Reserva> arr) {
@@ -248,5 +260,122 @@ class QuickIns {
     private static int comp(Reserva a, Reserva b) {
         int c = a.getNome().compareToIgnoreCase(b.getNome());
         return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
+    }
+}
+
+/* --- PESQUISA ABB --- */
+
+class NoABB {
+    Reserva dado;
+    NoABB esq, dir;
+
+    NoABB(Reserva dado) {
+        this.dado = dado;
+    }
+}
+
+class ABB {
+    private NoABB raiz;
+
+    public void inserir(Reserva r) {
+        raiz = inserirRec(raiz, r);
+    }
+
+    private NoABB inserirRec(NoABB atual, Reserva r) {
+        if (atual == null) return new NoABB(r);
+
+        int cmp = r.getNome().compareToIgnoreCase(atual.dado.getNome());
+        if (cmp < 0)
+            atual.esq = inserirRec(atual.esq, r);
+        else if (cmp > 0)
+            atual.dir = inserirRec(atual.dir, r);
+        else {
+            int cmpCod = r.getCodigo().compareToIgnoreCase(atual.dado.getCodigo());
+            if (cmpCod < 0)
+                atual.esq = inserirRec(atual.esq, r);
+            else if (cmpCod > 0)
+                atual.dir = inserirRec(atual.dir, r);
+            else
+                return atual; // já existe, evita recursao infinita (nome e cod iguais)
+        }
+
+        return atual;
+    }
+
+    public ArrayList<Reserva> buscar(String nome) {
+        ArrayList<Reserva> resultados = new ArrayList<>();
+        buscarRec(raiz, nome, resultados);
+        return resultados;
+    }
+
+    private void buscarRec(NoABB atual, String nome, ArrayList<Reserva> resultados) {
+        if (atual == null) return;
+
+        int cmp = nome.compareToIgnoreCase(atual.dado.getNome());
+        if (cmp == 0)
+            resultados.add(atual.dado);
+
+        if (cmp <= 0)
+            buscarRec(atual.esq, nome, resultados);
+        if (cmp >= 0)
+            buscarRec(atual.dir, nome, resultados);
+    }
+}
+
+class PesquisaABB {
+    public static void testarABB(String caminhoReservas, String nomeArquivo, String caminhoNomes) {
+        try {
+            long soma = 0;
+            for (int k = 0; k < 5; k++) {
+                long inicio = System.nanoTime();
+
+                ArrayList<Reserva> reservas = Leitor.ler(caminhoReservas);
+                ABB abb = new ABB();
+                for (Reserva r : reservas)
+                    abb.inserir(r);
+
+                ArrayList<String> nomesPesquisa = new ArrayList<>();
+                try (BufferedReader br = new BufferedReader(new FileReader(caminhoNomes))) {
+                    String linha;
+                    while ((linha = br.readLine()) != null)
+                        nomesPesquisa.add(linha.trim());
+                }
+
+                String saida = "saida/ABB_" + new File(nomeArquivo).getName();
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(saida))) {
+                    for (String nome : nomesPesquisa) {
+                        ArrayList<Reserva> achadas = abb.buscar(nome);
+                        bw.write("NOME " + nome + ":");
+                        bw.newLine();
+
+                        if (achadas.isEmpty()) {
+                            bw.write("NÃO TEM RESERVA");
+                            bw.newLine();
+                        } else {
+                            for (Reserva r : achadas) {
+                                bw.write("Reserva: " + r.getCodigo() +
+                                        " Voo: " + r.getVoo() +
+                                        " Data: " + r.getData() +
+                                        " Assento: " + r.getAssento());
+                                bw.newLine();
+                            }
+                            bw.write("TOTAL: " + achadas.size() + " reservas");
+                            bw.newLine();
+                        }
+                        bw.newLine();
+                    }
+                }
+
+                long fim = System.nanoTime();
+                soma += (fim - inicio);
+            }
+
+            long media = soma / 5;
+            System.out.println("Arquivo: " + nomeArquivo);
+            System.out.printf("ABB: %,d ns%n", media);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
