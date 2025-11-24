@@ -21,20 +21,29 @@ public class Main {
                 "src/arquivos/reserva50000ord.txt"
         };
 
+        System.out.println("===== RESULTADOS DOS TESTES =====\n");
+
         for (String arquivo : arquivosEntrada) {
-            testarHeapsort(arquivo);
-            testarQuicksort(arquivo);
-            testarQuickIns(arquivo);
+            String nomeCurto = new File(arquivo).getName();
+            System.out.println("Arquivo: " + nomeCurto);
+            System.out.println("--------------------------------------");
+            testarHeapsort(arquivo, nomeCurto);
+            testarQuicksort(arquivo, nomeCurto);
+            testarQuickIns(arquivo, nomeCurto);
+            System.out.println();
+
+
+
         }
     }
 
-    static void testarHeapsort(String nomeArquivo) {
+    static void testarHeapsort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(nomeArquivo);
+                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
                 Heapsort.ordenar(reservas);
                 long fim = System.nanoTime();
@@ -42,9 +51,9 @@ public class Main {
             }
 
             long media = soma / 5;
-            System.out.println("Heapsort - " + nomeArquivo + " média: " + media + " ns");
+            System.out.printf("Heapsort: %,d ns%n", media);
 
-            String saida = "saida/heap_" + new File(nomeArquivo).getName();
+            String saida = "saida/heap_" + nomeArquivo;
             Gravador.gravar(saida, reservas);
 
         } catch (Exception e) {
@@ -52,13 +61,13 @@ public class Main {
         }
     }
 
-    static void testarQuicksort(String nomeArquivo) {
+    static void testarQuicksort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(nomeArquivo);
+                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
                 Quicksort.ordenar(reservas, 0, reservas.size() - 1);
                 long fim = System.nanoTime();
@@ -66,9 +75,9 @@ public class Main {
             }
 
             long media = soma / 5;
-            System.out.println("Quicksort - " + nomeArquivo + " média: " + media + " ns");
+            System.out.printf("Quicksort: %,d ns%n", media);
 
-            String saida = "saida/quick_" + new File(nomeArquivo).getName();
+            String saida = "saida/quick_" + nomeArquivo;
             Gravador.gravar(saida, reservas);
 
         } catch (Exception e) {
@@ -76,13 +85,13 @@ public class Main {
         }
     }
 
-    static void testarQuickIns(String nomeArquivo) {
+    static void testarQuickIns(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(nomeArquivo);
+                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
                 QuickIns.ordenar(reservas, 0, reservas.size() - 1);
                 long fim = System.nanoTime();
@@ -90,9 +99,9 @@ public class Main {
             }
 
             long media = soma / 5;
-            System.out.println("Quick+Ins - " + nomeArquivo + " média: " + media + " ns");
+            System.out.printf("Quick+Ins: %,d ns%n", media);
 
-            String saida = "saida/quickins_" + new File(nomeArquivo).getName();
+            String saida = "saida/quickins_" + nomeArquivo;
             Gravador.gravar(saida, reservas);
 
         } catch (Exception e) {
@@ -128,8 +137,8 @@ class Heapsort {
     }
 
     private static int comp(Reserva a, Reserva b) {
-        int c = a.nome.compareToIgnoreCase(b.nome);
-        return c != 0 ? c : a.codigo.compareToIgnoreCase(b.codigo);
+        int c = a.getNome().compareToIgnoreCase(b.getNome());
+        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
     }
 }
 
@@ -175,8 +184,8 @@ class Quicksort {
     }
 
     private static int comp(Reserva a, Reserva b) {
-        int c = a.nome.compareToIgnoreCase(b.nome);
-        return c != 0 ? c : a.codigo.compareToIgnoreCase(b.codigo);
+        int c = a.getNome().compareToIgnoreCase(b.getNome());
+        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
     }
 }
 
@@ -237,7 +246,7 @@ class QuickIns {
     }
 
     private static int comp(Reserva a, Reserva b) {
-        int c = a.nome.compareToIgnoreCase(b.nome);
-        return c != 0 ? c : a.codigo.compareToIgnoreCase(b.codigo);
+        int c = a.getNome().compareToIgnoreCase(b.getNome());
+        return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
     }
 }

@@ -10,7 +10,7 @@ public class Gravador {
         arq.getParentFile().mkdirs();
         BufferedWriter bw = new BufferedWriter(new FileWriter(arq));
         for (Reserva r : lista) {
-            bw.write(r.codigo + ";" + r.nome + ";" + r.voo + ";" + r.data + ";" + r.assento);
+            bw.write(r.getCodigo() + ";" + r.getNome() + ";" + r.getVoo() + ";" + r.getData() + ";" + r.getAssento());
             bw.newLine();
         }
         bw.newLine();

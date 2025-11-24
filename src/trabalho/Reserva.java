@@ -1,11 +1,11 @@
 package trabalho;
 
-class Reserva {
-    String codigo;
-    String nome;
-    String voo;
-    String data;
-    String assento;
+public class Reserva {
+    private String codigo;
+    private String nome;
+    private String voo;
+    private String data;
+    private String assento;
 
     public Reserva(String codigo, String nome, String voo, String data, String assento) {
         this.codigo = codigo;
@@ -15,20 +15,20 @@ class Reserva {
         this.assento = assento;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
     public String getCodigo() {
         return codigo;
     }
 
     public void setCodigo(String codigo) {
         this.codigo = codigo;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     public String getVoo() {
@@ -53,5 +53,10 @@ class Reserva {
 
     public void setAssento(String assento) {
         this.assento = assento;
+    }
+
+    @Override
+    public String toString() {
+        return codigo + ";" + nome + ";" + voo + ";" + data + ";" + assento;
     }
 }
