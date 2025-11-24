@@ -30,7 +30,7 @@ public class ABB {
         int cmp = comparar(reserva, atual.dado);
         if (cmp < 0)
             atual.esquerda = inserirRec(atual.esquerda, reserva);
-        else
+        else if (cmp > 0)
             atual.direita = inserirRec(atual.direita, reserva);
 
         return atual;
@@ -74,6 +74,29 @@ public class ABB {
         }
     }
 
+    public void balancear() {
+        ArrayList<Reserva> lista = new ArrayList<>();
+        emOrdem(raiz, lista);
+        raiz = construirBalanceada(lista, 0, lista.size() - 1);
+    }
+
+    private void emOrdem(No atual, ArrayList<Reserva> lista) {
+        if (atual != null) {
+            emOrdem(atual.esquerda, lista);
+            lista.add(atual.dado);
+            emOrdem(atual.direita, lista);
+        }
+    }
+
+    private No construirBalanceada(ArrayList<Reserva> lista, int ini, int fim) {
+        if (ini > fim) return null;
+
+        int meio = (ini + fim) / 2;
+        No novo = new No(lista.get(meio));
+        novo.esquerda = construirBalanceada(lista, ini, meio - 1);
+        novo.direita = construirBalanceada(lista, meio + 1, fim);
+        return novo;
+    }
 
     private int comparar(Reserva a, Reserva b) {
         int c = a.getNome().compareToIgnoreCase(b.getNome());

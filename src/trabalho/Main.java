@@ -131,6 +131,9 @@ public class Main {
                 arvore.inserir(r);
             }
 
+            arvore.balancear();
+
+
             long inicio = System.nanoTime();
 
             for (Reserva nomeReserva : nomes) {
