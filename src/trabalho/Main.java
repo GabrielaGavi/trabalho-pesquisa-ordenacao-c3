@@ -65,8 +65,8 @@ public class Main {
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
+                reservas = Leitor.ler(caminho);
                 Heapsort.ordenar(reservas);
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
@@ -87,8 +87,8 @@ public class Main {
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
+                reservas = Leitor.ler(caminho);
                 Quicksort.ordenar(reservas, 0, reservas.size() - 1);
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
@@ -109,8 +109,8 @@ public class Main {
             ArrayList<Reserva> reservas = null;
 
             for (int i = 0; i < 5; i++) {
-                reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
+                reservas = Leitor.ler(caminho);
                 QuickIns.ordenar(reservas, 0, reservas.size() - 1);
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
@@ -127,33 +127,34 @@ public class Main {
 
     public static void testarABB(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
 
+        long soma = 0;
+
         try {
-            ABB arvore = new ABB();
-            ArrayList<Reserva> reservas = Leitor.ler(caminho);
+            for (int i = 0; i < 5; i++) {
 
-            for (Reserva r : reservas) arvore.inserir(r);
+                long inicio = System.nanoTime();
 
-            long inicio = System.nanoTime();
+                ABB arvore = new ABB();
+                ArrayList<Reserva> reservas = Leitor.ler(caminho);
 
-            String saida = "saida/ABB_" + nomeArquivo;
-//            ArrayList<Reserva> resultados = new ArrayList<>();
-//
-//            for (Reserva n : nomes) {
-//                ArrayList<Reserva> achadas = arvore.pesquisar(n.getNome());
-//
-//                if (achadas.isEmpty())
-//                    resultados.add(new Reserva("", n.getNome(), "NÃO TEM RESERVA", "", ""));
-//                else
-//                    resultados.addAll(achadas);
-//            }
+                for (Reserva r : reservas){
+                    arvore.inserir(r);
+                }
 
-            arvore.gravarResultado(saida, nomes);
+                arvore.balancear();
 
+                String saida = "saida/ABB_" + nomeArquivo;
+                arvore.gravarResultado(saida, nomes);
 
-            long fim = System.nanoTime();
-            System.out.println("ABB: " + (fim - inicio) + " ns");
+                long fim = System.nanoTime();
+                soma += (fim - inicio);
+            }
+
+            long media = soma / 5;
+            System.out.println("ABB: " + media + " ns");
 
         } catch (StackOverflowError e) {
+
             System.err.println("StackOverflow em " + nomeArquivo);
 
             try {
@@ -168,4 +169,5 @@ public class Main {
             System.err.println("Erro inesperado na ABB (" + nomeArquivo + "): " + e.getMessage());
         }
     }
+
 }

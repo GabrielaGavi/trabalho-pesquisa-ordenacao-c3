@@ -91,6 +91,39 @@ public class ABB {
         }
     }
 
+    // =============================
+    // BALANCEAR A ABB (após inserir tudo carregar arquivo)
+    // =============================
+    public void balancear() {
+        ArrayList<Reserva> lista = new ArrayList<>();
+        emOrdem(raiz, lista);              // 1) pega todos os elementos ordenados
+        raiz = construirBalanceada(lista, 0, lista.size() - 1); // 2) monta ABB balanceada
+    }
+
+    // Percurso em ordem para gerar lista ordenada
+    private void emOrdem(No atual, ArrayList<Reserva> lista) {
+        if (atual != null) {
+            emOrdem(atual.esquerda, lista);
+            lista.add(atual.dado);
+            emOrdem(atual.direita, lista);
+        }
+    }
+
+    // Constroi uma ABB balanceada a partir da lista ordenada
+    private No construirBalanceada(ArrayList<Reserva> lista, int ini, int fim) {
+        if (ini > fim) return null;
+
+        int meio = (ini + fim) / 2;
+
+        No no = new No(lista.get(meio));
+        no.esquerda = construirBalanceada(lista, ini, meio - 1);
+        no.direita = construirBalanceada(lista, meio + 1, fim);
+
+        return no;
+    }
+
+
+
 
     private int comparar(Reserva a, Reserva b) {
         String na = a.getNome().trim();
