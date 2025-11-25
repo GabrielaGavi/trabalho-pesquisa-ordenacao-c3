@@ -53,6 +53,7 @@ public class Main {
                 System.out.println("\nArquivo: " + nomeCurto);
                 testarABB(arquivo, nomeCurto, nomes);
                 testarAVL(arquivo, nomeCurto, nomes);
+                testarHashEncadeado(arquivo, nomeCurto, nomes);
             }
 
         } catch (IOException e) {
@@ -214,5 +215,50 @@ public class Main {
         System.out.println("AVL: " + media + " ns");
     }
 
+
+    public static void testarHashEncadeado(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
+
+        try {
+            long soma = 0;
+
+            for (int i = 0; i < 5; i++) {
+
+                long inicio = System.nanoTime();
+                HashEncadeado hash = new HashEncadeado(10007); // tamanho primo p/ ate 50k elementos
+                ArrayList<Reserva> reservas = Leitor.ler(caminho);
+
+                // inserir todas as reservas
+                for (Reserva r : reservas) {
+                    hash.inserir(r);
+                }
+
+
+                if (i == 4) {
+                    String saida = "saida/HASH_" + nomeArquivo;
+                    hash.gravarResultado(saida, nomes);
+                }
+
+                long fim = System.nanoTime();
+                soma += (fim - inicio);
+            }
+
+            long media = soma / 5;
+            System.out.println("HASH: " + media + " ns");
+
+        } catch (StackOverflowError e) {
+            System.err.println("StackOverflow em " + nomeArquivo);
+
+            try {
+                ArrayList<Reserva> erro = new ArrayList<>();
+                erro.add(new Reserva("ERRO", "StackOverflow ao processar este arquivo.", "", "", ""));
+                Gravador.gravar("saida/HASH_" + nomeArquivo, erro);
+            } catch (IOException ex) {
+                System.err.println("Erro ao criar arquivo de erro.");
+            }
+
+        } catch (Exception e) {
+            System.err.println("Erro inesperado no Hashing (" + nomeArquivo + "): " + e.getMessage());
+        }
+    }
 
 }
