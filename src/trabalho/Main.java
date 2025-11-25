@@ -3,7 +3,7 @@ package trabalho;
 import trabalho.entidades.Reserva;
 import trabalho.io.Leitor;
 import trabalho.io.Gravador;
-import trabalho.pesquisa.*;
+import trabalho.pesquisa.ABB;
 import trabalho.ordenacao.*;
 
 import java.io.IOException;
@@ -12,6 +12,7 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) {
+
         String[] arquivosReservas = {
                 "src/arquivos/reserva1000alea.txt",
                 "src/arquivos/reserva5000alea.txt",
@@ -43,8 +44,9 @@ public class Main {
         System.out.println("===== PESQUISA =====");
 
         String arquivoNomes = "src/arquivos/nome.txt";
+
         try {
-            ArrayList<Reserva> nomes = Leitor.ler(arquivoNomes);
+            ArrayList<Reserva> nomes = Leitor.lerNomes(arquivoNomes);
 
             for (String arquivo : arquivosReservas) {
                 String nomeCurto = arquivo.substring(arquivo.lastIndexOf("/") + 1);
@@ -57,14 +59,11 @@ public class Main {
         }
     }
 
-    /*
-     * MÉTODOS DE ORDENAÇÃO
-     */
-
     static void testarHeapsort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
+
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -72,9 +71,11 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
+
             long media = soma / 5;
             System.out.printf("Heapsort: %,d ns%n", media);
             Gravador.gravar("saida/heap_" + nomeArquivo, reservas);
+
         } catch (Exception e) {
             System.err.println("Erro no Heapsort (" + nomeArquivo + "): " + e.getMessage());
         }
@@ -84,6 +85,7 @@ public class Main {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
+
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -91,9 +93,11 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
+
             long media = soma / 5;
             System.out.printf("Quicksort: %,d ns%n", media);
             Gravador.gravar("saida/quick_" + nomeArquivo, reservas);
+
         } catch (Exception e) {
             System.err.println("Erro no Quicksort (" + nomeArquivo + "): " + e.getMessage());
         }
@@ -103,6 +107,7 @@ public class Main {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
+
             for (int i = 0; i < 5; i++) {
                 reservas = Leitor.ler(caminho);
                 long inicio = System.nanoTime();
@@ -110,54 +115,54 @@ public class Main {
                 long fim = System.nanoTime();
                 soma += (fim - inicio);
             }
+
             long media = soma / 5;
             System.out.printf("Quick+Ins: %,d ns%n", media);
             Gravador.gravar("saida/quickins_" + nomeArquivo, reservas);
+
         } catch (Exception e) {
             System.err.println("Erro no Quick+Ins (" + nomeArquivo + "): " + e.getMessage());
         }
     }
 
-    /*
-     * MÉTODOS DE PESQUISA
-     */
-
     static void testarABB(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
+
         try {
             ABB arvore = new ABB();
             ArrayList<Reserva> reservas = Leitor.ler(caminho);
 
-            for (Reserva r : reservas) {
-                arvore.inserir(r);
-            }
-
-            arvore.balancear();
-
+            for (Reserva r : reservas) arvore.inserir(r);
 
             long inicio = System.nanoTime();
 
-            for (Reserva nomeReserva : nomes) {
-                ArrayList<Reserva> achadas = arvore.pesquisar(nomeReserva.getNome());
-                String saida = "saida/ABB_" + nomeArquivo;
-                arvore.gravarResultado(saida, nomeReserva.getNome(), achadas);
+            String saida = "saida/ABB_" + nomeArquivo;
+            ArrayList<Reserva> resultados = new ArrayList<>();
+
+            for (Reserva n : nomes) {
+                ArrayList<Reserva> achadas = arvore.pesquisar(n.getNome());
+
+                if (achadas.isEmpty())
+                    resultados.add(new Reserva("", n.getNome(), "NÃO TEM RESERVA", "", ""));
+                else
+                    resultados.addAll(achadas);
             }
+
+            Gravador.gravar(saida, resultados);
 
             long fim = System.nanoTime();
             System.out.println("ABB: " + (fim - inicio) + " ns");
 
         } catch (StackOverflowError e) {
-            System.err.println("StackOverflow em " + nomeArquivo + " > árvore desbalanceada (lista encadeada gigante).");
+            System.err.println("StackOverflow em " + nomeArquivo);
 
             try {
                 ArrayList<Reserva> erro = new ArrayList<>();
                 erro.add(new Reserva("ERRO", "StackOverflow ao processar este arquivo.", "", "", ""));
                 Gravador.gravar("saida/ABB_" + nomeArquivo, erro);
             } catch (IOException ex) {
-                System.err.println("Erro ao gravar arquivo de erro: " + ex.getMessage());
+                System.err.println("Erro ao criar arquivo de erro.");
             }
 
-        } catch (IOException e) {
-            System.err.println("Erro de E/S no arquivo " + nomeArquivo + ": " + e.getMessage());
         } catch (Exception e) {
             System.err.println("Erro inesperado na ABB (" + nomeArquivo + "): " + e.getMessage());
         }

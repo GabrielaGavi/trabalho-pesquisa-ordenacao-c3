@@ -2,7 +2,6 @@ package trabalho.pesquisa;
 
 import trabalho.entidades.Reserva;
 import trabalho.io.Gravador;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -10,7 +9,6 @@ public class ABB {
 
     private No raiz;
 
-    //classe interna p/ representar no da arv
     private static class No {
         Reserva dado;
         No esquerda, direita;
@@ -30,7 +28,7 @@ public class ABB {
         int cmp = comparar(reserva, atual.dado);
         if (cmp < 0)
             atual.esquerda = inserirRec(atual.esquerda, reserva);
-        else if (cmp > 0)
+        else
             atual.direita = inserirRec(atual.direita, reserva);
 
         return atual;
@@ -45,7 +43,10 @@ public class ABB {
     private void pesquisarRec(No atual, String nome, ArrayList<Reserva> resultados) {
         if (atual == null) return;
 
-        int cmp = nome.compareToIgnoreCase(atual.dado.getNome());
+        String buscado = nome.trim();
+        String atualNome = atual.dado.getNome().trim();
+
+        int cmp = buscado.compareToIgnoreCase(atualNome);
 
         if (cmp == 0) {
             resultados.add(atual.dado);
@@ -74,32 +75,11 @@ public class ABB {
         }
     }
 
-    public void balancear() {
-        ArrayList<Reserva> lista = new ArrayList<>();
-        emOrdem(raiz, lista);
-        raiz = construirBalanceada(lista, 0, lista.size() - 1);
-    }
-
-    private void emOrdem(No atual, ArrayList<Reserva> lista) {
-        if (atual != null) {
-            emOrdem(atual.esquerda, lista);
-            lista.add(atual.dado);
-            emOrdem(atual.direita, lista);
-        }
-    }
-
-    private No construirBalanceada(ArrayList<Reserva> lista, int ini, int fim) {
-        if (ini > fim) return null;
-
-        int meio = (ini + fim) / 2;
-        No novo = new No(lista.get(meio));
-        novo.esquerda = construirBalanceada(lista, ini, meio - 1);
-        novo.direita = construirBalanceada(lista, meio + 1, fim);
-        return novo;
-    }
-
     private int comparar(Reserva a, Reserva b) {
-        int c = a.getNome().compareToIgnoreCase(b.getNome());
+        String na = a.getNome().trim();
+        String nb = b.getNome().trim();
+
+        int c = na.compareToIgnoreCase(nb);
         return c != 0 ? c : a.getCodigo().compareToIgnoreCase(b.getCodigo());
     }
 }
