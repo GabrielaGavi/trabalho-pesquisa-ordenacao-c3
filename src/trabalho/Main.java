@@ -59,7 +59,7 @@ public class Main {
         }
     }
 
-    static void testarHeapsort(String caminho, String nomeArquivo) {
+    public static void testarHeapsort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
@@ -81,7 +81,7 @@ public class Main {
         }
     }
 
-    static void testarQuicksort(String caminho, String nomeArquivo) {
+    public static void testarQuicksort(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
@@ -103,7 +103,7 @@ public class Main {
         }
     }
 
-    static void testarQuickIns(String caminho, String nomeArquivo) {
+    public static void testarQuickIns(String caminho, String nomeArquivo) {
         try {
             long soma = 0;
             ArrayList<Reserva> reservas = null;
@@ -125,7 +125,7 @@ public class Main {
         }
     }
 
-    static void testarABB(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
+    public static void testarABB(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
 
         try {
             ABB arvore = new ABB();
@@ -136,18 +136,19 @@ public class Main {
             long inicio = System.nanoTime();
 
             String saida = "saida/ABB_" + nomeArquivo;
-            ArrayList<Reserva> resultados = new ArrayList<>();
+//            ArrayList<Reserva> resultados = new ArrayList<>();
+//
+//            for (Reserva n : nomes) {
+//                ArrayList<Reserva> achadas = arvore.pesquisar(n.getNome());
+//
+//                if (achadas.isEmpty())
+//                    resultados.add(new Reserva("", n.getNome(), "NÃO TEM RESERVA", "", ""));
+//                else
+//                    resultados.addAll(achadas);
+//            }
 
-            for (Reserva n : nomes) {
-                ArrayList<Reserva> achadas = arvore.pesquisar(n.getNome());
+            arvore.gravarResultado(saida, nomes);
 
-                if (achadas.isEmpty())
-                    resultados.add(new Reserva("", n.getNome(), "NÃO TEM RESERVA", "", ""));
-                else
-                    resultados.addAll(achadas);
-            }
-
-            Gravador.gravar(saida, resultados);
 
             long fim = System.nanoTime();
             System.out.println("ABB: " + (fim - inicio) + " ns");

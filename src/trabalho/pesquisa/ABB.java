@@ -59,21 +59,38 @@ public class ABB {
         }
     }
 
-    public void gravarResultado(String nomeArquivo, String nome, ArrayList<Reserva> reservas) {
-        ArrayList<Reserva> saida = new ArrayList<>();
+    public void gravarResultado(String nomeArquivo, ArrayList<Reserva> nomesPesquisados) {
+        ArrayList<String> linhas = new ArrayList<>();
 
-        if (reservas.isEmpty()) {
-            saida.add(new Reserva("", nome, "NÃO TEM RESERVA", "", ""));
-        } else {
-            saida.addAll(reservas);
+        for (Reserva nomeBuscado : nomesPesquisados) {
+
+            String nome = nomeBuscado.getNome().trim();
+            linhas.add("NOME " + nome + ":");
+
+            ArrayList<Reserva> achadas = pesquisar(nome);
+
+            if (achadas.isEmpty()) {
+                linhas.add("NÃO TEM RESERVA");
+            } else {
+                for (Reserva r : achadas) {
+                    linhas.add("Reserva: " + r.getCodigo()
+                            + " Voo: " + r.getVoo()
+                            + " Data: " + r.getData()
+                            + " Assento: " + r.getAssento());
+                }
+                linhas.add("TOTAL: " + achadas.size() + " reservas");
+            }
+
+            linhas.add(""); // linha em branco entre pessoas
         }
 
         try {
-            Gravador.gravar(nomeArquivo, saida);
+            Gravador.gravarPesquisa(nomeArquivo, linhas);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
 
     private int comparar(Reserva a, Reserva b) {
         String na = a.getNome().trim();
