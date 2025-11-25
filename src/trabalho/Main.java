@@ -3,7 +3,7 @@ package trabalho;
 import trabalho.entidades.Reserva;
 import trabalho.io.Leitor;
 import trabalho.io.Gravador;
-import trabalho.pesquisa.ABB;
+import trabalho.pesquisa.*;
 import trabalho.ordenacao.*;
 
 import java.io.IOException;
@@ -52,6 +52,7 @@ public class Main {
                 String nomeCurto = arquivo.substring(arquivo.lastIndexOf("/") + 1);
                 System.out.println("\nArquivo: " + nomeCurto);
                 testarABB(arquivo, nomeCurto, nomes);
+                testarAVL(arquivo, nomeCurto, nomes);
             }
 
         } catch (IOException e) {
@@ -169,5 +170,49 @@ public class Main {
             System.err.println("Erro inesperado na ABB (" + nomeArquivo + "): " + e.getMessage());
         }
     }
+
+    static void testarAVL(String caminho, String nomeArquivo, ArrayList<Reserva> nomes) {
+
+        long somaTempos = 0;
+
+        for (int repeticao = 0; repeticao < 5; repeticao++) {
+
+            try {
+                long inicio = System.nanoTime();
+
+                AVL arvore = new AVL();
+                ArrayList<Reserva> reservas = Leitor.ler(caminho);
+
+                for (Reserva r : reservas) arvore.inserir(r);
+
+                String saida = "saida/AVL_" + nomeArquivo;
+
+                arvore.gravarResultado(saida, nomes);
+
+                long fim = System.nanoTime();
+                somaTempos += (fim - inicio);
+
+            } catch (StackOverflowError e) {
+                System.err.println("StackOverflow em " + nomeArquivo + " (AVL)");
+
+                try {
+                    ArrayList<String> erro = new ArrayList<>();
+                    erro.add("ERRO: StackOverflow ao processar este arquivo.");
+                    Gravador.gravarPesquisa("saida/AVL_" + nomeArquivo, erro);
+                } catch (IOException ex) {
+                    System.err.println("Erro ao criar arquivo de erro AVL.");
+                }
+
+                return;
+            } catch (Exception e) {
+                System.err.println("Erro inesperado na AVL (" + nomeArquivo + "): " + e.getMessage());
+                return;
+            }
+        }
+
+        long media = somaTempos / 5;
+        System.out.println("AVL: " + media + " ns");
+    }
+
 
 }
